@@ -1,4 +1,4 @@
-# Work in progress, bugs and unexpected behaviour might occur
+# Work in progress, bugs and unexpected behavior might occur
 ## Usage:
 Playbooks are targeted towards Ubuntu Server, other distributions will not work
 - Clone the repository
