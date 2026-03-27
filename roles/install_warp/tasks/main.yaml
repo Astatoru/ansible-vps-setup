@@ -30,7 +30,7 @@
     name: cloudflare-warp
     state: present
     update_cache: true
-- name: Start Warp service
+- name: Enable Warp service
   ansible.builtin.systemd_service:
     name: warp-svc.service
     enabled: true

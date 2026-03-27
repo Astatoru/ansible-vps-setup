@@ -1,6 +1,6 @@
 # vim:ft=yaml.ansible
 ---
-- name: Enable strict reverse path filtering for IPv6
+- name: Enable reverse path filtering for IPv6
   ansible.builtin.lineinfile:
     path: /etc/firewalld/firewalld.conf
     regexp: "^IPv6_rpfilter="

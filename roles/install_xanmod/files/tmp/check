@@ -1,6 +1,6 @@
 #!/bin/bash
 # vim:ft=bash
-declare -a DEPENDENCIES="(wget)"
+declare -a DEPENDENCIES="(wget awk)"
 
 # Function that displays error messages
 function error() {
@@ -41,7 +41,7 @@ function checkDependencies() {
   done
 }
 
-# Check if CPU supports the kernelt
+# Check if CPU supports Xanmod kernel
 function checkSupport() {
   local CPU_SUPPORT_INFO
   if [[ -f "/etc/os-release" ]]; then
