@@ -40,15 +40,15 @@ ansible-galaxy install -r "requirements.yaml"
 ### Variables
 - `main.yaml`
 
-| Variable       | Description                                                                               | Value      | Data type |
-| -------------- | ----------------------------------------------------------------------------------------- | ---------- | --------- |
-| `target_hosts` | Which hosts from `inventory/inventory.yaml` would be targeted                             | `all`      | str       |
-| `ssh_key`      | Your public ED25519 ssh key that will be copied over to the `~/.ssh/authorized_keys` file | empty      | str       |
-| `user`         | User name that will be used when creating non-root user                                   | `user`     | str       |
-| `sftpuser`     | User name that will be used when creating SFTP server user                                | `sftpuser` | str       |
+| Variable       | Description                                                                               | Default value | Data type |
+| -------------- | ----------------------------------------------------------------------------------------- | ------------- | --------- |
+| `target_hosts` | Which hosts from `inventory/inventory.yaml` would be targeted                             | `all`         | str       |
+| `ssh_key`      | Your public ED25519 ssh key that will be copied over to the `~/.ssh/authorized_keys` file | empty         | str       |
+| `user`         | User name that will be used when creating non-root user                                   | `user`        | str       |
+| `sftpuser`     | User name that will be used when creating SFTP server user                                | `sftpuser`    | str       |
 - `optional.yaml`
 
-| Variable          | Description                                                                                                          | Value         | Data type |
+| Variable          | Description                                                                                                          | Default value | Data type |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------- | ------------- | --------- |
 | `disable_root`    | Disable root account (Recommended)                                                                                   | `true`        | bool      |
 | `block_parasites` | Block subnets of the russian government agencies on the firewall                                                     | `false`       | bool      |
