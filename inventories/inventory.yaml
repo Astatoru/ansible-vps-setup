@@ -1,5 +1,0 @@
-# vim:ft=yaml
-test:
-  hosts:
-    proxy:
-      ansible_host: 192.168.122.3
