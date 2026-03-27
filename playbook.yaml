@@ -110,13 +110,6 @@
         - /etc/unbound/unbound.conf.d/
         - /etc/ssh/sshd_config.d/
         - /etc/sysctl.d/
-    - name: Copy scripts
-      ansible.builtin.copy:
-        src: usr/
-        dest: /usr/
-        owner: root
-        group: root
-        mode: "0755"
     - name: Copy configs
       ansible.builtin.copy:
         src: etc/
