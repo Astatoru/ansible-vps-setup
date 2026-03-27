@@ -47,7 +47,7 @@ source ".env/bin/activate"
 | Variable          | Description                                                                                                          | Value         | Data type |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------- | ------------- | --------- |
 | `disable_root`    | Disable root account (Recommended)                                                                                   | `true`        | bool      |
-| `block_parasites` | Block subnets of the russian government agencies on the firewal                                                      | `false`       | bool      |
+| `block_parasites` | Block subnets of the russian government agencies on the firewall                                                     | `false`       | bool      |
 | `install_docker`  | Install Docker, and run Watchtower container                                                                         | `false`       | bool      |
 | `install_nginx`   | Install nginx, obtain letsencrypt certificate and add ready to use nginx config for steal-oneself xray configuration | `false`       | bool      |
 | `nginx_port`      | Port that nginx would be listening to                                                                                | `42069`       | int       |
