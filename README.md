@@ -1,4 +1,6 @@
+# Work in progress, bugs and unexpected behaviour might occur
 ## Usage:
+Playbooks are targeted towards Ubuntu Server, other distributions will not work
 - Clone the repository
 ```bash
 git clone https://github.com/Astatoru/ansible-vps-setup.git
