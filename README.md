@@ -1,11 +1,11 @@
 # Work in progress, bugs and unexpected behavior might occur
 ## Usage:
-Playbooks are targeted towards Ubuntu Server, other distributions will not work
+All playbooks are targeted towards Ubuntu Server, other distributions will not work
 - Clone the repository
 ```bash
 git clone https://github.com/Astatoru/ansible-vps-setup.git
 ```
-- Generate your ED25519 (ONLY ED25519 KEYS ARE SUPPORTED!!!)
+- Generate your ED25519 ssh keypair (ONLY ED25519 KEYS ARE SUPPORTED!!!)
 ```bash
 ssh-keygen -t ed25519 -a 32 -C "example@mail.com"
 ```
