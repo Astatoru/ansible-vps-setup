@@ -7,14 +7,10 @@
     owner: root
     group: root
     mode: "0644"
-- name: Check if nginx repository file exists
-  ansible.builtin.stat:
-    path: /etc/apt/sources.list.d/nginx.sources
-  register: nginx_repo_file
 - name: Add nginx repository
-  ansible.builtin.lineinfile:
-    path: /etc/apt/sources.list.d/nginx.sources
-    line: |
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/nginx.sources
+    content: |
       Types: deb
       URIs: https://nginx.org/packages/ubuntu
       Suites: {{ ansible_facts['distribution_release'] }}
@@ -23,8 +19,6 @@
     owner: root
     group: root
     mode: "0644"
-    create: true
-  when: not nginx_repo_file.stat.exists
 - name: Install nginx
   ansible.builtin.apt:
     name: nginx
@@ -61,7 +55,7 @@
     owner: root
     group: root
     mode: "0644"
-  notify: "restart fail2ban"
+  notify: restart_fail2ban
 - name: "Obtain certificate for {{ domain }}"
   ansible.builtin.include_role:
     name: geerlingguy.certbot

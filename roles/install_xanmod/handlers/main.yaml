@@ -1,0 +1,8 @@
+# yaml.ansible
+---
+- name: Update grub
+  ansible.builtin.command: update-grub
+  listen: update_grub
+- name: Reboot the server (If this play fails, ignore it)
+  ansible.builtin.command: reboot
+  listen: reboot

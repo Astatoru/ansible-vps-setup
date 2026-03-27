@@ -2,8 +2,8 @@
 ---
 - name: Copy script
   ansible.builtin.copy:
-    src: tmp/
-    dest: /tmp/
+    src: tmp/check
+    dest: /tmp/check
     owner: root
     group: root
     mode: "0755"
@@ -17,14 +17,10 @@
     owner: root
     group: root
     mode: "0644"
-- name: Check if Xanmod repository file exists
-  ansible.builtin.stat:
-    path: /etc/apt/sources.list.d/xanmod.sources
-  register: xanmod_repo_file
 - name: Add Xanmod repository
-  ansible.builtin.lineinfile:
-    path: /etc/apt/sources.list.d/xanmod.sources
-    line: |
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/xanmod.sources
+    content: |
       Types: deb
       URIs: http://deb.xanmod.org
       Suites: {{ ansible_facts['distribution_release'] }}
@@ -33,14 +29,11 @@
     owner: root
     group: root
     mode: "0644"
-    create: true
-  when: not xanmod_repo_file.stat.exists
 - name: Install Xanmod kernel
   ansible.builtin.apt:
     name: "{{ xanmod_kernel.stdout }}"
     state: present
     update_cache: true
-- name: Update grub
-  ansible.builtin.command: update-grub
-- name: Reboot the server (If this play fails, ignore it)
-  ansible.builtin.command: reboot
+  notify:
+    - update_grub
+    - reboot

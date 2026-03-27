@@ -7,14 +7,10 @@
     owner: root
     group: root
     mode: "0644"
-- name: Check if Warp repository file exists
-  ansible.builtin.stat:
-    path: /etc/apt/sources.list.d/warp.sources
-  register: warp_repo_file
 - name: Add Warp repository
-  ansible.builtin.lineinfile:
-    path: /etc/apt/sources.list.d/warp.sources
-    line: |
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/warp.sources
+    content: |
       Types: deb
       URIs: https://pkg.cloudflareclient.com
       Suites: {{ ansible_facts['distribution_release'] }}
@@ -23,8 +19,6 @@
     owner: root
     group: root
     mode: "0644"
-    create: true
-  when: not warp_repo_file.stat.exists
 - name: Install Warp
   ansible.builtin.apt:
     name: cloudflare-warp
