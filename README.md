@@ -17,14 +17,14 @@ sudo pacman -Syu python python-pip
 ```bash
 python3 -m venv ".env"
 ```
+- Activate Python virtual environment (you have to execute this everytime before running `playbook.yaml`)
+```bash
+source ".env/bin/activate"
+```
 - Install python and ansible dependencies
 ```bash
 pip install -r "requirements.txt"
 ansible-galaxy install -r "requirements.yaml"
-```
-- Activate Python virtual environment (you have to execute this everytime before running `playbook.yaml`)
-```bash
-source ".env/bin/activate"
 ```
 - Add your servers to `inventories/inventory.yaml`
 - Fill in `vars/main.yaml`
