@@ -1,0 +1,7 @@
+# vim:ft=yaml.ansible
+---
+roles:
+  - geerlingguy.certbot
+collections:
+  - ansible.posix
+  - community.docker

@@ -1,0 +1,131 @@
+# vim:ft=conf
+#----------#
+# Settings #
+#----------#
+# Set shell
+set shell bash
+
+# Show hidden files
+# set hidden true
+
+# Show file icons 
+set icons true
+
+# Show file size and modification date
+set info size:time
+
+# Selection attribute
+set cursorpreviewfmt "\033[7;1m"
+
+# Change prompt (top-left corner)
+set promptfmt "\033[32;1m%u@%h\033[2;37m:\033[0m\033[0;34m%d%f\033[0m"
+
+#----------#
+# Mappings #
+#----------#
+# Unselect
+map <esc> :clear; unselect
+
+# Open
+map o open
+
+# Create a directory
+map A push :mkdir<space>
+
+# Create a file
+map a push :touch<space>
+
+# Cut
+map d
+map dd cut
+
+# Delete
+map dD delete
+map dS shred
+
+# Create a link
+# y (select for copy) and *  to paste symlink
+# d (select for cut) and * to paste hard link
+map * :link
+
+# Follow link
+map gl follow-link
+
+# Copy
+map y
+map yy copy
+
+# Show preivews
+map zi set preview!
+
+# Paste with overwrite
+map P paste-overwrite
+
+# Show output of previous commands
+map ` !true
+
+#---------#
+# Scripts #
+#---------#
+# Create a directory
+cmd mkdir ${{
+  IFS=" "
+  mkdir -- "$*"
+}}
+
+# Create a file
+cmd touch ${{
+  IFS=" "
+  touch -- "$*"
+}}
+
+# Paste with overwrite
+# Dependencies: rsync
+cmd paste-overwrite &{{
+  set -f
+  mode=$(head -1 ~/.local/share/lf/files)
+  list=$(sed 1d ~/.local/share/lf/files)
+  set -- _ $list; shift
+  [ $# -gt 0 ] || exit
+  case $mode in
+    copy)
+      rsync --recursive --progress "$@" ./
+      ;;
+    move)
+      rsync --recursive --remove-source-files --progress "$@" ./
+      ;;
+  esac
+  lf -remote 'save\nmove\n'
+  lf -remote "send $id load"
+  lf -remote "send $id echo \"\033[0;32mpasted $# file(s)\033[0m\""
+}}
+
+# Create link
+cmd link %{{
+    set -- $(cat ~/.local/share/lf/files)
+    mode="$1"
+    shift
+    if [ "$#" -lt 1 ]; then
+        lf -remote "send $id echoerr no files to link"
+        exit
+    fi
+    case "$mode" in
+        # 'copy' mode indicates a symlink
+        copy) ln -sr -t . -- "$@";;
+        # while 'move' mode indicates a hard link
+        move)
+            ln -t . -- "$@"
+            lf -remote "send clear"
+            ;;
+    esac
+}}
+
+# Follow link
+cmd follow-link %{{
+  lf -remote "send $id select \"$(readlink -- "$f" | sed 's/\\/\\\\/g;s/"/\\"/g')\""
+}}
+
+# Shred
+cmd shred ${{
+  shred -f -u -n 3 -z "$fx"
+}}

@@ -1,0 +1,70 @@
+# vim:ft=yaml.ansible
+---
+- name: Enable strict reverse path filtering for IPv6
+  ansible.builtin.lineinfile:
+    path: /etc/firewalld/firewalld.conf
+    regexp: "^IPv6_rpfilter="
+    line: "IPv6_rpfilter={{ 'strict' if (ansible_facts['lsb']['major_release'] >= '25') else 'yes' }}"
+- name: Enable ICMP block inversion for external zone
+  ansible.posix.firewalld:
+    icmp_block_inversion: true
+    zone: external
+    state: enabled
+    permanent: true
+- name: Enable forwarding for external zone
+  ansible.posix.firewalld:
+    forward: true
+    zone: external
+    state: enabled
+    permanent: true
+- name: Set target to DROP for external zone
+  ansible.posix.firewalld:
+    target: DROP
+    zone: external
+    state: enabled
+    permanent: true
+- name: Open several ports for services
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    zone: external
+    state: enabled
+    permanent: true
+  loop:
+    - http
+    - https
+    - ssh
+    - dhcpv6
+- name: Add allowed ICMP types
+  ansible.builtin.firewalld:
+    icmp_block: "{{ item }}"
+    zone: external
+    state: enabled
+    permanent: true
+  loop:
+    - bad-header
+    - echo-request
+    - destination-unreachable
+    - neighbour-advertisement
+    - neighbour-solicitation
+    - packet-too-big
+    - router-advertisement
+    - router-solicitation
+    - time-exceeded
+    - unknown-header-type
+- name: Add main network interface to the external zone
+  ansible.posix.firewalld:
+    interface: "{{ nic }}"
+    zone: external
+    state: enabled
+    permanent: true
+- name: Add loopback network interface to the block zone
+  ansible.posix.firewalld:
+    interface: "lo"
+    zone: block
+    state: enabled
+    permanent: true
+- name: Set default zone to external
+  ansible.builtin.command: firewall-cmd --set-default-zone=external
+  register: default_zone_set
+  changed_when:
+    - '"ZONE_ALREADY_SET" not in default_zone_set.stderr'

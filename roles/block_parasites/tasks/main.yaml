@@ -1,0 +1,83 @@
+# vim:ft=yaml.ansible
+---
+- name: Install dependencies
+  ansible.builtin.apt:
+    name: ipset
+    state: present
+- name: Download IPv4 list
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/C24Be/AS_Network_List/refs/heads/main/blacklists_iptables/blacklist-v4.ipset
+    dest: /etc/blacklist-v4.ipset
+    owner: root
+    group: root
+    mode: "0644"
+- name: Download IPv6 list
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/C24Be/AS_Network_List/refs/heads/main/blacklists_iptables/blacklist-v6.ipset
+    dest: /etc/blacklist-v6.ipset
+    owner: root
+    group: root
+    mode: "0644"
+- name: Create ipset lists
+  ignore_errors: true
+  ansible.builtin.command:
+    cmd: "{{ item }}"
+  loop:
+    - ipset flush blacklist-v4
+    - ipset destroy blacklist-v4
+    - ipset flush blacklist-v6
+    - ipset destroy blacklist-v6
+    - ipset restore -file "/etc/blacklist-v4.ipset"
+    - ipset restore -file "/etc/blacklist-v6.ipset"
+- name: Add firewalld direct rules
+  ansible.builtin.command:
+    cmd: "{{ item }}"
+  loop:
+    - firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -m set --match-set blacklist-v4 src -m conntrack --ctstate NEW -j DROP
+    - firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -m set --match-set blacklist-v4 src -m conntrack --ctstate NEW -j DROP
+    - firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT 0 -m set --match-set blacklist-v6 src -m conntrack --ctstate NEW -j DROP
+    - firewall-cmd --permanent --direct --add-rule ipv6 filter FORWARD 0 -m set --match-set blacklist-v6 src -m conntrack --ctstate NEW -j DROP
+    - firewall-cmd --reload
+- name: Copy script
+  ansible.builtin.copy:
+    src: usr/
+    dest: /usr/
+    owner: root
+    group: root
+    mode: "0755"
+- name: Add cronjob that updates lists daily
+  ansible.builtin.cron:
+    name: Update blacklist
+    hour: "4"
+    minute: "0"
+    job: /usr/local/bin/update-blacklist
+    user: root
+- name: Check if ipset-restore service file exists
+  ansible.builtin.stat:
+    path: /etc/systemd/system/ipset-restore.service
+  register: ipset_restore_service
+- name: Add ipset-restore service
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/system/ipset-restore.service
+    line: |
+      [Unit]
+      Description=Restore ipset lists
+      Before=firewalld.service
+
+      [Service]
+      Type=oneshot
+      ExecStart=/sbin/ipset restore -file "/etc/blacklist-v4.ipset"
+      ExecStart=/sbin/ipset restore -file "/etc/blacklist-v6.ipset"
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    group: root
+    mode: "0644"
+    create: true
+  when: not ipset_restore_service.stat.exists
+- name: Enable ipset-restore service
+  ansible.builtin.systemd_service:
+    name: ipset-restore
+    enabled: true
+    daemon_reload: true

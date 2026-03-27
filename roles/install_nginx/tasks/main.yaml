@@ -1,0 +1,82 @@
+# vim:ft=yaml.ansible
+---
+- name: Add nginx GPG apt key
+  ansible.builtin.get_url:
+    url: https://nginx.org/keys/nginx_signing.key
+    dest: /etc/apt/keyrings/nginx.asc
+    owner: root
+    group: root
+    mode: "0644"
+- name: Check if nginx repository file exists
+  ansible.builtin.stat:
+    path: /etc/apt/sources.list.d/nginx.sources
+  register: nginx_repo_file
+- name: Add nginx repository
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list.d/nginx.sources
+    line: |
+      Types: deb
+      URIs: https://nginx.org/packages/ubuntu
+      Suites: {{ ansible_facts['distribution_release'] }}
+      Components: nginx
+      Signed-By: /etc/apt/keyrings/nginx.asc
+    owner: root
+    group: root
+    mode: "0644"
+    create: true
+  when: not nginx_repo_file.stat.exists
+- name: Install nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: true
+- name: Copy nginx template
+  ansible.builtin.template:
+    src: etc/nginx/nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: "0644"
+- name: "Create {{ domain }} directory"
+  ansible.builtin.file:
+    path: "/var/nginx/{{ domain }}/"
+    owner: nginx
+    group: nginx
+    mode: "0755"
+    state: directory
+- name: Find all files inside /etc/nginx/conf.d/
+  ansible.builtin.find:
+    paths: /etc/nginx/conf.d/
+    file_type: any
+  register: configs
+- name: Remove all files from that directory
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ configs.files }}"
+- name: Copy fail2ban nginx config
+  ansible.builtin.copy:
+    src: etc/fail2ban/jail.d/nginx.conf
+    dest: /etc/fail2ban/jail.d/nginx.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: "restart fail2ban"
+- name: "Obtain certificate for {{ domain }}"
+  ansible.builtin.include_role:
+    name: geerlingguy.certbot
+  vars:
+    certbot_certs:
+      domains: "{{ domain }}"
+    certbot_auto_renew_user: root
+    certbot_create_method: standalone
+    certbot_create_standalone_stop_services: nginx
+    certbot_install_method: package
+    certbot_create_if_missing: true
+    certbot_hsts: true
+    certbot_create_command: "{{ certbot_script }} certonly --standalone --noninteractive --agree-tos --register-unsafely-without-email -d {{ cert_item.domains | join(',') }}"
+- name: Enable nginx systemd unit
+  ansible.builtin.systemd_service:
+    name: nginx.service
+    enabled: true
+    state: started

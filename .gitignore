@@ -1,0 +1,4 @@
+**/.ansible/
+**/.env/
+**/roles_galaxy/
+**/collections_galaxy/

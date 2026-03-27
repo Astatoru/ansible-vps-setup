@@ -1,0 +1,217 @@
+# vim:ft=yaml.ansible
+---
+- name: Configure the server
+  hosts: "{{ target_hosts }}"
+  remote_user: root
+  gather_facts: true
+  become: true
+  vars_files: vars/main.yaml
+  vars_prompt:
+    - name: password
+      prompt: "Please enter a password for the new user"
+  tasks:
+    - name: Update all packages
+      ansible.builtin.apt:
+        upgrade: "full"
+        update_cache: true
+        autoclean: true
+        autoremove: true
+    - name: Install dependencies
+      ansible.builtin.apt:
+        name: "{{ install }}"
+        state: present
+    - name: Uninstall unnecessary packages
+      ansible.builtin.apt:
+        name: "{{ uninstall }}"
+        state: absent
+    - name: Change a hostname
+      ansible.builtin.hostname:
+        name: "{{ inventory_hostname }}"
+    - name: "Create new user: {{ user }}"
+      ansible.builtin.user:
+        name: "{{ user }}"
+        shell: /bin/bash
+        groups: sudo,systemd-journal
+        password: "{{ password | password_hash('sha512') }}"
+        append: true
+        create_home: false
+    - name: "Make sudo passwordless for {{ user }}"
+      ansible.builtin.lineinfile:
+        path: "/etc/sudoers.d/99-{{ user }}"
+        line: "{{ user }} ALL=(ALL) NOPASSWD: ALL"
+        owner: root
+        group: root
+        mode: "0640"
+        create: true
+    - name: Create a new group for SFTP server
+      ansible.builtin.group:
+        name: sftp
+    - name: Create directories for SFTP server
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      loop:
+        - /sftp/
+        - /sftp/.ssh/
+    - name: Create a new user for SFTP server
+      ansible.builtin.user:
+        name: "{{ sftp_user }}"
+        home: /sftp/
+        shell: /usr/sbin/nologin
+        group: sftp
+        password: "{{ password | password_hash('sha512') }}"
+        create_home: false
+    - name: Create public directory for SFTP
+      ansible.builtin.file:
+        path: /sftp/public/
+        state: directory
+        owner: root
+        group: root
+        mode: "0777"
+    - name: Add public SSH key to SFTP server
+      ansible.builtin.lineinfile:
+        path: "/sftp/.ssh/authorized_keys"
+        line: "{{ ssh_key }}"
+        owner: root
+        group: root
+        mode: "0644"
+        create: true
+    - name: Find all files inside MOTD scripts directory
+      ansible.builtin.find:
+        paths: /etc/update-motd.d/
+        file_type: any
+      register: motd
+    - name: Remove executable permissions from all found files (Disable MOTD)
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: "-x"
+      loop: "{{ motd.files }}"
+    - name: Remove unnecessary files and directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/unbound/unbound.conf.d/
+        - /etc/ssh/sshd_config.d/
+        - /etc/sysctl.d/
+        - /etc/resolv.conf
+        - /etc/sysctl.conf
+    - name: Recreate directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      loop:
+        - /etc/unbound/unbound.conf.d/
+        - /etc/ssh/sshd_config.d/
+        - /etc/sysctl.d/
+    - name: Copy scripts
+      ansible.builtin.copy:
+        src: usr/
+        dest: /usr/
+        owner: root
+        group: root
+        mode: "0755"
+    - name: Copy configs
+      ansible.builtin.copy:
+        src: etc/
+        dest: /etc/
+        owner: root
+        group: root
+        mode: preserve
+    - name: Copy ssh config template
+      ansible.builtin.template:
+        src: etc/ssh/sshd_config.d/99-override.conf.j2
+        dest: /etc/ssh/sshd_config.d/99-override.conf
+        owner: root
+        group: root
+        mode: "0644"
+    - name: Copy hosts template
+      ansible.builtin.template:
+        src: etc/hosts.j2
+        dest: /etc/hosts
+        owner: root
+        group: root
+        mode: "0644"
+    - name: Copy user configs
+      ansible.builtin.copy:
+        src: home/user/
+        dest: "/home/{{ user }}/"
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: preserve
+    - name: "Add public SSH key for {{ user }}"
+      ansible.builtin.lineinfile:
+        path: "/home/{{ user }}/.ssh/authorized_keys"
+        line: "{{ ssh_key }}"
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0644"
+        create: true
+    - name: Copy configs to root user
+      ansible.builtin.copy:
+        src: "home/user/.config/"
+        dest: /root/.config/
+        owner: root
+        group: root
+        mode: preserve
+    - name: Disable swap
+      ansible.builtin.replace:
+        path: /etc/fstab
+        regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+        replace: '#\1\2\3swap\4'
+        backup: true
+    - name: Disable zswap
+      vars:
+        grub_add:
+          - { key: "GRUB_CMDLINE_LINUX_DEFAULT", value: "zswap.enabled=0" }
+      ansible.builtin.lineinfile:
+        backrefs: true
+        path: "/etc/default/grub"
+        regexp: '^\s*{{ item.key }}\s*="(?!.*{{ item.value }})(.*)"$'
+        line: '{{ item.key }}="\1 {{ item.value }}"'
+      loop: "{{ grub_add }}"
+    - name: Update grub
+      ansible.builtin.command: update-grub
+    - name: Disable unnecessary systemd units
+      ansible.builtin.systemd_service:
+        name: "{{ item }}"
+        masked: true
+      loop:
+        - systemd-timesyncd.service
+        - systemd-resolved.service
+        - rescue.service
+        - debug-shell.service
+        - motd-news.service
+        - motd-news.timer
+        - rescue.target
+    - name: Enable systemd units
+      ansible.builtin.systemd_service:
+        name: "{{ item }}"
+        enabled: true
+      loop:
+        - ntpd-rs.service
+        - firewalld.service
+        - unbound.service
+        - unattended-upgrades.service
+        - fail2ban.service
+        - tuned.service
+        - systemd-zram-setup@zram0.service
+    - name: Add cronjob that cleans up logs weekly
+      ansible.builtin.cron:
+        name: Cleanup logs
+        special_time: weekly
+        job: "/usr/bin/journalctl --vacuum-time=1s"
+        user: root
+    - name: Enable latency optimized profile for tuned
+      ansible.builtin.command: tuned-adm profile network-latency
+    - name: Configure firewalld
+      ansible.builtin.include_role:
+        name: configure_firewalld
+    - name: Reboot the server (If this play fails, ignore it)
+      ansible.builtin.command: reboot

@@ -1,0 +1,43 @@
+# vim:ft=yaml.ansible
+---
+- name: Configure and install optional stuff
+  hosts: "{{ target_hosts }}"
+  remote_user: "{{ user }}"
+  gather_facts: true
+  become: true
+  vars_files:
+    - vars/main.yaml
+    - vars/optional.yaml
+  tasks:
+    - name: Disable root account
+      ansible.builtin.user:
+        name: root
+        shell: /usr/sbin/nologin
+        password: "*"
+        password_lock: true
+      when: disable_root | bool
+    - name: Block subnets of the russian government agencies
+      ansible.builtin.include_role:
+        name: block_parasites
+      when: block_parasites | bool
+    - name: Install Docker
+      ansible.builtin.include_role:
+        name: install_docker
+      when: install_docker | bool
+    - name: Install nginx
+      ansible.builtin.include_role:
+        name: install_nginx
+      when:
+        - install_nginx | bool
+        - nginx_port is defined
+        - domain is defined
+    - name: Install Cloudflare Warp
+      ansible.builtin.include_role:
+        name: install_warp
+      when:
+        - install_warp | bool
+        - warp_port is defined
+    - name: Install Xanmod kernel (should be the last play since it restarts the server)
+      ansible.builtin.include_role:
+        name: install_xanmod
+      when: install_xanmod | bool

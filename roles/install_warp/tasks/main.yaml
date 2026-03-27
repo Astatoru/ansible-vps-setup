@@ -1,0 +1,45 @@
+# vim:ft=yaml.ansible
+---
+- name: Add Warp GPG apt key
+  ansible.builtin.get_url:
+    url: https://pkg.cloudflareclient.com/pubkey.gpg
+    dest: /etc/apt/keyrings/warp.asc
+    owner: root
+    group: root
+    mode: "0644"
+- name: Check if Warp repository file exists
+  ansible.builtin.stat:
+    path: /etc/apt/sources.list.d/warp.sources
+  register: warp_repo_file
+- name: Add Warp repository
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list.d/warp.sources
+    line: |
+      Types: deb
+      URIs: https://pkg.cloudflareclient.com
+      Suites: {{ ansible_facts['distribution_release'] }}
+      Components: main
+      Signed-By: /etc/apt/keyrings/warp.asc
+    owner: root
+    group: root
+    mode: "0644"
+    create: true
+  when: not warp_repo_file.stat.exists
+- name: Install Warp
+  ansible.builtin.apt:
+    name: cloudflare-warp
+    state: present
+    update_cache: true
+- name: Start Warp service
+  ansible.builtin.systemd_service:
+    name: warp-svc.service
+    enabled: true
+    state: started
+- name: Configure warp
+  ansible.builtin.command:
+    cmd: "{{ item }}"
+  loop:
+    - warp-cli --accept-tos registration new
+    - warp-cli --accept-tos mode proxy
+    - "warp-cli --accept-tos proxy port {{ warp_port }}"
+    - warp-cli --accept-tos connect

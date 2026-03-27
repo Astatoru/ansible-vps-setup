@@ -1,0 +1,51 @@
+# vim:ft=yaml
+# Which hosts from "inventory/inventory.yaml" would be targeted
+target_hosts: all
+# Public ED25519 ssh key that will be copied over to the "~/.ssh/authorized_keys" file
+# Input yours from "~/.ssh/id_ed25519.pub"
+ssh_key:
+# User name that will be used when creating non-root user
+user: user
+# User name that will be used when creating SFTP server user
+sftp_user: sftpuser
+# Server's IP address
+ip: "{{ ansible_facts['default_ipv4']['address'] }}"
+# Server's main inteface name
+nic: "{{ ansible_facts['default_ipv4']['interface'] }}"
+# Dependencies
+install:
+  - curl
+  - wget
+  - apparmor
+  - certbot
+  - tuned
+  - logrotate
+  - unbound
+  - dnsutils
+  - dns-root-data
+  - bind9-dnsutils
+  - ntpd-rs
+  - firewalld
+  - nftables
+  - fail2ban
+  - systemd-zram-generator
+  - neovim
+  - lf
+  - gdu
+  - git
+  - gh
+  - rsync
+  - tealdeer
+  - fd-find
+  - bash-completion
+  - unattended-upgrades
+  - update-notifier-common
+  - gnupg2
+  - ca-certificates
+  - ubuntu-keyring
+  - man-db
+# Packages to uninstall
+uninstall:
+  - ufw
+  - vim
+  - nano

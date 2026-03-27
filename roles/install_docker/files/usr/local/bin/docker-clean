@@ -1,0 +1,59 @@
+#!/bin/bash
+# vim:ft=bash
+declare -a DEPENDENCIES="(docker)"
+
+# Function that displays error messages
+function error() {
+  local MESSAGE="$1"
+  # Check if stderr is in interactive mode
+  if [[ -t 2 ]]; then
+    >&2 printf "%b\n" "\033[01;31mERROR\033[0m: $MESSAGE"
+  else
+    >&2 printf "%s\n" "ERROR: $MESSAGE"
+  fi
+}
+
+# Function that displays info messages
+function info() {
+  local MESSAGE="$1"
+  # Check if stdout is in interactive mode
+  if [[ -t 1 ]]; then
+    printf "%b\n" "\033[01;34mINFO\033[0m: $MESSAGE"
+  else
+    printf "%s\n" "INFO: $MESSAGE"
+  fi
+}
+
+# Check if dependencies are installed
+function checkDependencies() {
+  for CMD in "${DEPENDENCIES[@]}"; do
+    if ! command -v "$CMD" &>/dev/null; then
+      error "$CMD is not installed"
+      exit 1
+    fi
+  done
+}
+
+# Cleanup docker
+function cleanupDocker() {
+  # Prune docker
+  docker system prune -f 2>/dev/null
+  # Remove unused containers
+  docker rm $(docker ps -aq) 2>/dev/null
+  # Remove networks
+  docker network rm $(docker network ls -q) 2>/dev/null
+  # Remove volumes
+  docker volume rm $(docker volume ls -q) 2>/dev/null
+  # Remove images
+  docker image rm $(docker image ls -aq) 2>/dev/null
+  info "Docker cleaned up successfully"
+}
+
+# Main function
+function main() {
+  checkDependencies
+  cleanupDocker
+}
+
+# Execute main function
+main "$@"

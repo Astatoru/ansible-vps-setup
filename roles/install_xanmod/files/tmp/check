@@ -1,0 +1,76 @@
+#!/bin/bash
+# vim:ft=bash
+declare -a DEPENDENCIES="(wget)"
+
+# Function that displays error messages
+function error() {
+  local MESSAGE="$1"
+  # Check if stderr is in interactive mode
+  if [[ -t 2 ]]; then
+    >&2 printf "%b\n" "\033[01;31mERROR\033[0m: $MESSAGE"
+  else
+    >&2 printf "%s\n" "ERROR: $MESSAGE"
+  fi
+}
+
+# Function that displays info messages
+function info() {
+  local MESSAGE="$1"
+  # Check if stdout is in interactive mode
+  if [[ -t 1 ]]; then
+    printf "%b\n" "\033[01;34mINFO\033[0m: $MESSAGE"
+  else
+    printf "%s\n" "INFO: $MESSAGE"
+  fi
+}
+
+# Check if the script is run as root
+function checkRoot() {
+  if ((EUID != 0)); then
+    error "Please run this script as root"
+    exit 1
+  fi
+}
+
+# Check if dependencies are installed
+function checkDependencies() {
+  for CMD in "${DEPENDENCIES[@]}"; do
+    if ! command -v "$CMD" &>/dev/null; then
+      error "$CMD is not installed"
+      exit 1
+    fi
+  done
+}
+
+# Check if CPU supports the kernelt
+function checkSupport() {
+  local CPU_SUPPORT_INFO
+  if [[ -f "/etc/os-release" ]]; then
+    source "/etc/os-release"
+    if [[ "$ID" != "ubuntu" ]]; then
+      error "The script only works under Ubuntu"
+      exit 1
+    fi
+  else
+    error "/etc/os-release doesn't exist"
+    exit 1
+  fi
+
+  CPU_SUPPORT_INFO=$(/usr/bin/awk -f <(wget -4qO - https://dl.xanmod.org/check_x86-64_psabi.sh) || exit 1)
+  if [[ $CPU_SUPPORT_INFO == "CPU supports x86-64-v"* ]]; then
+    printf "%b\n" "${CPU_SUPPORT_INFO#CPU supports x86-64-v}"
+  else
+    error "Current system doesn't support Xanmod kernel"
+    exit 1
+  fi
+}
+
+# Main function
+function main() {
+  checkDependencies
+  checkRoot
+  checkSupport
+}
+
+# Execute main function
+main "$@"

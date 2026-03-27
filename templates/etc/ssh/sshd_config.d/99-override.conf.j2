@@ -1,0 +1,54 @@
+# vim:ft=sshdconfig
+AddressFamily inet
+ListenAddress {{ ip }}
+Port 22
+AllowUsers {{ user }} {{ sftpuser }}
+LogLevel VERBOSE
+
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKeyAlgorithms ssh-ed25519
+HostbasedAcceptedAlgorithms ssh-ed25519
+PubkeyAcceptedKeyTypes ssh-ed25519
+CASignatureAlgorithms ssh-ed25519
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
+KexAlgorithms sntrup761x25519-sha512@openssh.com,curve25519-sha256@libssh.org
+MACs -*
+
+AuthenticationMethods publickey
+AuthorizedKeysFile .ssh/authorized_keys
+
+Subsystem sftp /usr/bin/false
+
+IgnoreUserKnownHosts yes
+PermitUserEnvironment no
+PermitUserRC no
+
+PasswordAuthentication no
+PermitEmptyPasswords no
+PermitRootLogin no
+ChallengeResponseAuthentication no
+GSSAPIAuthentication no
+HostbasedAuthentication no
+KerberosAuthentication no
+KbdInteractiveAuthentication no
+
+MaxAuthTries 3
+MaxStartups 10:30:60
+LoginGraceTime 30s
+
+TCPKeepAlive no
+ClientAliveInterval 15
+ClientAliveCountMax 4
+
+UsePAM yes
+AllowAgentForwarding no
+AllowTcpForwarding no
+PrintMotd no
+PrintLastLog yes
+Banner /etc/issue
+
+Match group sftp
+  ChrootDirectory %h
+  Subsystem sftp /usr/lib/openssh/sftp-server
+  ForceCommand internal-sftp
+  DisableForwarding yes

@@ -1,0 +1,25 @@
+# vim:ft=yaml
+# Disable root account (recommended)
+disable_root: true
+# Block subnets of the russian government agencies on the firewall
+# This protects against scanning and active probing from RKN, GRFC and other parasites
+block_parasites: false
+# Install Docker, and run Watchtower container
+install_docker: false
+# Install nginx, obtain letsencrypt certificate and add ready to use nginx config for steal-oneself xray configuration
+# Don't forget to fill in "domain" variable below!
+install_nginx: false
+# Port that nginx would be listening to
+nginx_port: 42069
+# Domain name that is tied to the server
+# Variable should be changed only when `install_nginx` is set to `true`
+domain: example.com
+# Install warp, configure it as socks5 proxy and connect
+install_warp: false
+# Port that will be used for socks5 proxy
+warp_port: 10086
+# Install xanmod kernel
+# This kernel includes a wide range of optimizations
+# Including BBRv3
+# Not all systems are supported!
+install_xanmod: false

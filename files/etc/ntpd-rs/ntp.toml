@@ -1,0 +1,19 @@
+[observability]
+log-level = "error"
+observation-path = "/var/run/ntpd-rs/observe"
+
+[[source]]
+mode = "nts"
+address = "1.ntp.ubuntu.com"
+
+[[source]]
+mode = "nts"
+address = "2.ntp.ubuntu.com"
+
+[[source]]
+mode = "nts"
+address = "3.ntp.ubuntu.com"
+
+[[source]]
+mode = "nts"
+address = "4.ntp.ubuntu.com"

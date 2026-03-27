@@ -1,0 +1,64 @@
+#!/bin/bash
+# vim:ft=bash
+# Function that displays error messages
+function error() {
+  local MESSAGE="$1"
+  # Check if stderr is in interactive mode
+  if [[ -t 2 ]]; then
+    >&2 printf "%b\n" "\033[01;31mERROR\033[0m: $MESSAGE"
+  else
+    >&2 printf "%s\n" "ERROR: $MESSAGE"
+  fi
+}
+
+# Function that displays info messages
+function info() {
+  local MESSAGE="$1"
+  # Check if stdout is in interactive mode
+  if [[ -t 1 ]]; then
+    printf "%b\n" "\033[01;34mINFO\033[0m: $MESSAGE"
+  else
+    printf "%s\n" "INFO: $MESSAGE"
+  fi
+}
+
+# Check if the script is run as root
+function checkRoot() {
+  if ((EUID != 0)); then
+    error "Please run this script as root or using sudo"
+    exit 1
+  fi
+}
+
+# Disable root account
+function enableRoot() {
+  usermod --expiredate -1 root
+  chsh --shell /bin/bash root
+  info "Please input a password for root:"
+  while true; do
+    if passwd root; then
+      break
+    else
+      error "Please input a password for root:"
+    fi
+  done
+  info "Root account successfully enabled"
+}
+
+# Main function
+function main() {
+  checkRoot
+  enableRoot
+}
+
+# Stop script execution immediately
+# If any command below fails
+set -o "errexit"
+# Throw an error if script fails
+trap "error 'Something went wrong...'; exit 1" EXIT
+
+# Execute main function
+main "$@"
+
+# Disable trap
+trap "" EXIT
