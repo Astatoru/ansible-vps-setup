@@ -13,7 +13,7 @@ ssh-keygen -t ed25519 -a 32 -C "example@mail.com"
 ```bash
 sudo pacman -Syu python python-pip
 ```
-- Create new python virtual environment and install
+- Create new python virtual environment
 ```bash
 python3 -m venv ".env"
 ```
