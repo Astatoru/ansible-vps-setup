@@ -13,10 +13,14 @@ ssh-keygen -t ed25519 -a 32 -C "example@mail.com"
 ```bash
 sudo pacman -Syu python python-pip
 ```
-- Run the script that installs python and ansible dependencies
+- Create new python virtual environment and install
 ```bash
-chmod u+x init.sh
-./init.sh
+python3 -m venv ".env"
+```
+- Install python and ansible dependencies
+```bash
+pip install -r "requirements.txt"
+ansible-galaxy install -r "requirements.yaml"
 ```
 - Activate Python virtual environment (you have to execute this everytime before running `playbook.yaml`)
 ```bash
