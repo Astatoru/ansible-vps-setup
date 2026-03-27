@@ -2,7 +2,7 @@
 AddressFamily inet
 ListenAddress {{ ip }}
 Port 22
-AllowUsers {{ user }} {{ sftpuser }}
+AllowUsers {{ user }} {{ sftp_user }}
 LogLevel VERBOSE
 
 HostKey /etc/ssh/ssh_host_ed25519_key

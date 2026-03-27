@@ -1,9 +1,9 @@
 # vim:ft=yaml
 # Which hosts from "inventory/inventory.yaml" would be targeted
-target_hosts: test
+target_hosts: all
 # Public ED25519 ssh key that will be copied over to the "~/.ssh/authorized_keys" file
 # Input yours from "~/.ssh/id_ed25519.pub"
-ssh_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICdKbnxCNR/zJfpJRE7vsSg/Q3qSuHr/tZbj0wIgjAnQ astatoru
+ssh_key:
 # User name that will be used when creating non-root user
 user: user
 # User name that will be used when creating SFTP server user

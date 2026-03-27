@@ -11,10 +11,14 @@ ssh-keygen -t ed25519 -a 32 -C "example@mail.com"
 ```bash
 sudo pacman -Syu python python-pip
 ```
-- Run the script using source command
+- Run the script that installs dependencies
 ```bash
 chmod u+x init.sh
-source init.sh
+./init.sh
+```
+- Activate Python virtual environment
+```bash
+source ".env/bin/activate"
 ```
 - Add your servers to `inventories/inventory.yaml`
 - Fill in `vars/main.yaml`

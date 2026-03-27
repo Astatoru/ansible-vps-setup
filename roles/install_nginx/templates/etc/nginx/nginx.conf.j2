@@ -64,14 +64,14 @@ http {
   }
 
   server {
-    listen 127.0.0.1:{{ nginxport }} ssl default_server;
+    listen 127.0.0.1:{{ nginx_port }} ssl default_server;
 
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_reject_handshake on;
   }
 
   server {
-    listen 127.0.0.1:{{ nginxport }} ssl reuseport proxy_protocol;
+    listen 127.0.0.1:{{ nginx_port }} ssl reuseport proxy_protocol;
     server_name {{ domain }};
     http2 on;
 

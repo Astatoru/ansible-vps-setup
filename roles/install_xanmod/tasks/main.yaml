@@ -1,13 +1,15 @@
 # vim:ft=yaml.ansible
 ---
 - name: Copy script
-  ansible.builtin.file:
-    src: tmp/check
-    dest: /tmp/check
+  ansible.builtin.copy:
+    src: tmp/
+    dest: /tmp/
+    owner: root
+    group: root
     mode: "0755"
 - name: Check if kernel supports Xanmod kernel
   ansible.builtin.command: bash /tmp/check
-  register: cpu_support_level
+  register: xanmod_kernel
 - name: Add Xanmod GPG apt key
   ansible.builtin.get_url:
     url: https://dl.xanmod.org/archive.key
@@ -35,10 +37,10 @@
   when: not xanmod_repo_file.stat.exists
 - name: Install Xanmod kernel
   ansible.builtin.apt:
-    name: "{{ linux-xanmod-lts-x64v if ({{ cpu_support_level }} == '1') else linux-xanmod-x64v }}{{ '3' if ({{ cpu_support_level }} == '4') else {{ cpu_support_level }} }}"
+    name: "{{ xanmod_kernel.stdout }}"
     state: present
     update_cache: true
 - name: Update grub
   ansible.builtin.command: update-grub
-- name: Reboot the server
+- name: Reboot the server (If this play fails, ignore it)
   ansible.builtin.command: reboot

@@ -2,3 +2,6 @@
 **/.env/
 **/roles_galaxy/
 **/collections_galaxy/
+**/inventories/inventory.yaml
+**/vars/main.yaml
+**/vars/optional.yaml

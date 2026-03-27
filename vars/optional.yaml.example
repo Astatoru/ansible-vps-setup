@@ -22,4 +22,4 @@ warp_port: 10086
 # This kernel includes a wide range of optimizations
 # Including BBRv3
 # Not all systems are supported!
-install_xanmod: true
+install_xanmod: false

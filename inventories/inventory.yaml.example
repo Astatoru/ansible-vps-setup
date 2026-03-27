@@ -1,0 +1,13 @@
+# vim:ft=yaml
+# Servers hostnames will be renamed to the node names specified here
+# Group my_nodes
+my_nodes:
+  hosts:
+    # Node name
+    my_node_1:
+      # Node IP
+      ansible_host: 127.0.0.1
+    node_2:
+      ansible_host: 127.0.0.1
+    node:
+      ansible_host: 127.0.0.1
