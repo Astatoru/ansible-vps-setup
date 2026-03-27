@@ -10,6 +10,7 @@ function error() {
   else
     >&2 printf "%s\n" "ERROR: $MESSAGE"
   fi
+  exit 1
 }
 
 # Function that displays info messages
@@ -27,7 +28,6 @@ function info() {
 function checkRoot() {
   if ((EUID == 0)); then
     error "Please don't run this script as root"
-    exit 1
   fi
 }
 
@@ -37,10 +37,8 @@ function checkDependencies() {
     if ! command -v "$CMD" &>/dev/null; then
       if [[ "$CMD" == "pip" ]]; then
         error "python-pip is not installed"
-        exit 1
       else
         error "$CMD is not installed"
-        exit 1
       fi
     fi
   done
@@ -73,8 +71,8 @@ function main() {
 # Stop script execution immediately
 # If any command below fails
 set -o "errexit"
-# Throw an error if script fails
-trap "error 'Something went wrong...'; exit 1" EXIT
+# Pause the script on fail
+trap "read -r -p 'Press any key to continue...'" EXIT
 
 # Execute main function
 main "$@"

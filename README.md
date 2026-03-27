@@ -3,14 +3,18 @@
 ```bash
 git clone https://github.com/Astatoru/ansible-vps-setup.git
 ```
+- Generate your ED25519 (ONLY ED25519 KEYS ARE SUPPORTED!!!)
+```bash
+ssh-keygen -t ed25519 -a 32 -C "example@mail.com"
+```
+- Install script dependencies using your package manager
+```bash
+sudo pacman -Syu python python-pip
+```
 - Run the script using source command
 ```bash
 chmod u+x init.sh
 source init.sh
-```
-- Generate your ED25519 (ONLY ED25519 KEYS ARE SUPPORTED!!!)
-```bash
-ssh-keygen -t ed25519 -a 32 -C "example@mail.com"
 ```
 - Add your servers to `inventories/inventory.yaml`
 - Fill in `vars/main.yaml`

@@ -11,6 +11,7 @@ function error() {
   else
     >&2 printf "%s\n" "ERROR: $MESSAGE"
   fi
+  exit 1
 }
 
 # Function that displays info messages
@@ -29,7 +30,6 @@ function checkDependencies() {
   for CMD in "${DEPENDENCIES[@]}"; do
     if ! command -v "$CMD" &>/dev/null; then
       error "$CMD is not installed"
-      exit 1
     fi
   done
 }

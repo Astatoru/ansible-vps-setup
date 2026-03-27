@@ -9,6 +9,7 @@ function error() {
   else
     >&2 printf "%s\n" "ERROR: $MESSAGE"
   fi
+  exit 1
 }
 
 # Function that displays info messages
@@ -26,7 +27,6 @@ function info() {
 function checkRoot() {
   if ((EUID != 0)); then
     error "Please run this script as root or using sudo"
-    exit 1
   fi
 }
 
@@ -55,7 +55,7 @@ function main() {
 # If any command below fails
 set -o "errexit"
 # Throw an error if script fails
-trap "error 'Something went wrong...'; exit 1" EXIT
+trap "error 'Something went wrong...'" EXIT
 
 # Execute main function
 main "$@"
