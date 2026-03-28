@@ -15,6 +15,7 @@ sudo pacman -Syu python python-pip ansible-core
 ```
 - Create new python virtual environment
 ```bash
+cd ansible-vps-setup
 python3 -m venv ".env"
 ```
 - Activate Python virtual environment (you have to execute this everytime before running `playbook.yaml`)
