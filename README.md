@@ -37,7 +37,7 @@ ansible-galaxy install -r "requirements.yaml"
   ```bash
   ansible-playbook playbook_post.yaml
   ```
-### Variables
+## Variables
 - `main.yaml`
 
 | Variable       | Description                                                                               | Default value | Data type |
@@ -59,3 +59,12 @@ ansible-galaxy install -r "requirements.yaml"
 | `install_warp`    | Install warp, configure it as socks5 proxy and connect                                                               | `false`       | bool      |
 | `warp_port`       | Port that will be used for socks5 proxy                                                                              | `10086`       | int       |
 | `install_xanmod`  | Install Xanmod kernel, that includes a wide range of optimizations, including BBRv3 (not all systems are supported)  | `false`       | bool      |
+## Toolkit:
+- `neovim` - Text editor
+- `lf` - File manager
+- `fdfind` - File search
+- `gdu` - Disk usage analyzer
+- `tldr` - Cheatsheets for console commands
+- `firewalld` - Firewall
+- `unbound` - DNS client
+- `ntpd-rs` - NTP client (in our case it's NTS client)
