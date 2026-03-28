@@ -37,7 +37,7 @@
       when:
         - install_warp | bool
         - warp_port is defined
-    - name: Install Xanmod kernel (should be the last play since it restarts the server)
+    - name: Install Xanmod kernel
       ansible.builtin.include_role:
         name: install_xanmod
       when: install_xanmod | bool
