@@ -7,7 +7,7 @@
     owner: root
     group: root
     mode: "0755"
-- name: Check if kernel supports Xanmod kernel
+- name: Check if system supports Xanmod kernel
   ansible.builtin.command: bash /tmp/check
   register: xanmod_kernel
 - name: Add Xanmod GPG apt key

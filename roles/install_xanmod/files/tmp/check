@@ -59,6 +59,7 @@ function checkSupport() {
   fi
 }
 
+# Output right kernel package name
 function checkKernel() {
   local CPU_SUPPORT_VER="${CPU_SUPPORT_INFO#CPU supports x86-64-v}"
   if ((CPU_SUPPORT_VER == 1)); then
