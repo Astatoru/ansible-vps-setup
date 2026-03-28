@@ -9,9 +9,9 @@ git clone https://github.com/Astatoru/ansible-vps-setup.git
 ```bash
 ssh-keygen -t ed25519 -a 32 -C "example@mail.com"
 ```
-- Install script dependencies using your package manager
+- Install dependencies using your package manager
 ```bash
-sudo pacman -Syu python python-pip
+sudo pacman -Syu python python-pip ansible-core
 ```
 - Create new python virtual environment
 ```bash
