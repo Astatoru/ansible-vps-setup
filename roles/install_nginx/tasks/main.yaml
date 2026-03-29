@@ -19,9 +19,11 @@
     owner: root
     group: root
     mode: "0644"
-- name: Install nginx
+- name: Install nginx and certbot
   ansible.builtin.apt:
-    name: nginx
+    name:
+      - nginx
+      - certbot
     state: present
     update_cache: true
 - name: Copy nginx template
@@ -50,26 +52,29 @@
   loop: "{{ configs.files }}"
 - name: Copy fail2ban nginx config
   ansible.builtin.copy:
-    src: etc/fail2ban/jail.d/nginx.conf
-    dest: /etc/fail2ban/jail.d/nginx.conf
+    src: etc/fail2ban/
+    dest: /etc/fail2ban/
     owner: root
     group: root
-    mode: "0644"
+    mode: preserve
   notify: restart_fail2ban
+- name: Copy certbot hooks
+  ansible.builtin.copy:
+    src: etc/letsencrypt/
+    dest: /etc/letsencrypt/
+    owner: root
+    group: root
+    mode: "755"
 - name: "Obtain certificate for {{ domain }}"
-  ansible.builtin.include_role:
-    name: geerlingguy.certbot
-  vars:
-    certbot_certs:
-      domains: "{{ domain }}"
-    certbot_auto_renew_user: root
-    certbot_create_method: standalone
-    certbot_create_standalone_stop_services: nginx
-    certbot_install_method: package
-    certbot_create_if_missing: true
-    certbot_hsts: true
-    certbot_create_command: "{{ certbot_script }} certonly --standalone --noninteractive --agree-tos --register-unsafely-without-email -d {{ cert_item.domains | join(',') }}"
-- name: Enable nginx systemd unit
+  ansible.builtin.command:
+    cmd: "certbot certonly --standalone --non-interactive --agree-tos --register-unsafely-without-email --pre-hook /etc/letsencrypt/renewal-hooks/pre/stop-nginx --post-hook /etc/letsencrypt/renewal-hooks/post/start-nginx --disable-hook-validation -d {{ domain }}"
+- name: Add cronjob that renews certificate weekly
+  ansible.builtin.cron:
+    name: "Renew {{ domain }} certificate"
+    special_time: weekly
+    job: /usr/bin/certbot renew --pre-hook /etc/letsencrypt/renewal-hooks/pre/stop-nginx --post-hook /etc/letsencrypt/renewal-hooks/post/start-nginx --disable-hook-validation
+    user: root
+- name: Ensure nginx service is enabled
   ansible.builtin.systemd_service:
     name: nginx.service
     enabled: true

@@ -206,5 +206,6 @@
     - name: Configure firewalld
       ansible.builtin.include_role:
         name: configure_firewalld
-    - name: Reboot the server (If this play fails, ignore it)
+    - name: Reboot the server
+      ignore_errors: true
       ansible.builtin.command: reboot
