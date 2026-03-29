@@ -1,13 +1,16 @@
 # vim:ft=yaml
 # Servers hostnames will be renamed to the node names specified here
-# Group my_nodes
+# Group "my_nodes"
 my_nodes:
   hosts:
-    # Node name
+    # Node "my_node_1"
     my_node_1:
       # Node IP
       ansible_host: 127.0.0.1
-    node_2:
-      ansible_host: 127.0.0.1
-    node:
+      # You can also add any variable from "vars/main.yaml" or "vars/optional.yaml" here
+      # It will override global value only for current node
+      # This is useful if you're configuring many nodes at once
+      user: superuser
+      domain: other.example.com
+    other_node_2:
       ansible_host: 127.0.0.1
