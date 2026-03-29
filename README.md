@@ -9,6 +9,7 @@ git clone https://github.com/Astatoru/ansible-vps-setup.git
 ssh-keygen -t ed25519 -a 32 -C "example@mail.com"
 ```
 - Install dependencies using your package manager
+  - `ansible-core` is optional
 ```bash
 sudo pacman -Syu python python-pip ansible-core
 ```
