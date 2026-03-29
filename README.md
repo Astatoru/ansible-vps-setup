@@ -1,4 +1,3 @@
-# Work in progress, bugs and unexpected behavior might occur
 ## Usage:
 All playbooks are targeted towards Ubuntu Server, other distributions will not work
 - Clone the repository
