@@ -8,7 +8,7 @@ my_nodes:
       # Node IP
       ansible_host: 127.0.0.1
       # You can also add any variable from "vars/main.yaml" or "vars/optional.yaml" here
-      # It will override global value only for current node
+      # It will override global values only for current node
       # This is useful if you're configuring many nodes at once
       user: superuser
       domain: other.example.com
