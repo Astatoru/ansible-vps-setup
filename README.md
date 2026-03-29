@@ -29,6 +29,7 @@ ansible-galaxy install -r "requirements.yaml"
 ```
 - Add your servers to `inventories/inventory.yaml`
 - Fill in `vars/main.yaml`
+  - Make sure you can ssh as root user, otherwise playbook won't work!
   - Run the first playbook
   ```bash
   ansible-playbook --ask-pass playbook.yaml
