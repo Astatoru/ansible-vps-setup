@@ -29,14 +29,22 @@
         name: install_nginx
       when:
         - install_nginx | bool
-        - nginx_port is defined
+        - nginx_port | int
         - domain is defined
     - name: Install Cloudflare Warp
       ansible.builtin.include_role:
         name: install_warp
       when:
         - install_warp | bool
-        - warp_port is defined
+        - warp_port | int
+    - name: Run Remnawave node
+      ansible.builtin.include_role:
+        name: run_remnanode
+      when:
+        - run_remnanode | bool
+        - remnawave_panel_ip | int
+        - node_port | int
+        - compose is defined
     - name: Install Xanmod kernel
       ansible.builtin.include_role:
         name: install_xanmod

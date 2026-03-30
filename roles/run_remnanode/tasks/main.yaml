@@ -1,0 +1,28 @@
+# vim:ft=yaml.ansible
+---
+- name: Allow connections from control plane
+  ansible.posix.firewalld:
+    rich_rule: "rule family=ipv4 source address={{ remnawave_panel_ip }} port port={{ node_port }} protocol=tcp accept"
+    zone: external
+    state: enabled
+    permanent: true
+  notify: reload_firewalld
+- name: "Create /home/{{ user }}/docker/remnanode/ directory"
+  ansible.builtin.file:
+    path: "/home/{{ user }}/docker/remnanode/"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0755"
+- name: Add compose.yaml to that directory
+  ansible.builtin.copy:
+    ansible.builtin.copy:
+    dest: "/home/{{ user }}/docker/remnanode/compose.yaml"
+    content: |
+      "{{ compose }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0644"
+- name: Run remnanode
+  community.docker.docker_compose_v2:
+    project_src: "/home/{{ user }}/docker/remnanode/"

@@ -4,5 +4,6 @@
   ansible.builtin.command: update-grub
   listen: update_grub
 - name: Reboot the server
+  ignore_errors: true
   ansible.builtin.command: reboot
   listen: reboot
